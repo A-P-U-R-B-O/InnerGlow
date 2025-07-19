@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from backend.assistant import router as assistant_router
+from fastapi.staticfiles import StaticFiles
 import os
 
+from backend.assistant import router as assistant_router
 # If you plan to use database or background tasks in future, import here.
 
 app = FastAPI(
@@ -28,6 +28,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount React build as static files at root
+static_folder = os.path.join(os.path.dirname(__file__), '../frontend/build')
+app.mount("/", StaticFiles(directory=static_folder, html=True), name="static")
 
 # Include assistant router
 app.include_router(assistant_router)
@@ -62,17 +66,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={"detail": exc.errors(), "body": exc.body, "type": "ValidationError"}
     )
-
-# --- Custom global routes ---
-@app.get("/", tags=["root"])
-def read_root():
-    """Root endpoint for health/status."""
-    return {
-        "service": "InnerGlow",
-        "status": "OK",
-        "version": "1.0.0",
-        "docs_url": "/docs"
-    }
 
 # Optionally expose model schemas for frontend/clients
 from backend.models import User, Session, Message, MoodEntry, JournalEntry
