@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from assistant import router as assistant_router
+from backend.assistant import router as assistant_router
 import os
 
 # If you plan to use database or background tasks in future, import here.
@@ -75,7 +75,7 @@ def read_root():
     }
 
 # Optionally expose model schemas for frontend/clients
-from models import User, Session, Message, MoodEntry, JournalEntry
+from backend.models import User, Session, Message, MoodEntry, JournalEntry
 
 @app.get("/schemas", tags=["meta"])
 def get_model_schemas():
@@ -89,5 +89,7 @@ def get_model_schemas():
     }
 
 # --- Advanced: ready for adding more routers ---
+# For future: from backend.journal import router as journal_router
 # For future: app.include_router(journal_router)
+# For future: from backend.mood import router as mood_router
 # For future: app.include_router(mood_router)
