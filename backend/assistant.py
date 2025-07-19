@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
-from gemini_api import GeminiAPIClient, get_gemini_client
+from backend.gemini_api import GeminiAPIClient, get_gemini_client
 
 router = APIRouter(
     prefix="/assistant",
