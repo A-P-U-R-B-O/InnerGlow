@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: innerglow-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    autoDeploy: true
+    envVars:
+      - key: CORS_ORIGINS
+        value: "*"
+    plan: starter
+    healthCheckPath: /schemas
+
+  - type: web
+    name: innerglow-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s build
+    staticPublishPath: build
+    plan: starter
+    envVars:
+      - key: REACT_APP_API_URL
+        value: "https://innerglow-backend.onrender.com"
