@@ -29,12 +29,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount React build as static files at root
-static_folder = os.path.join(os.path.dirname(__file__), '../frontend/build')
-app.mount("/", StaticFiles(directory=static_folder, html=True), name="static")
+# --- Health/Status endpoint for frontend ---
+@app.get("/health", tags=["root"])
+def read_health():
+    """Health/status endpoint for frontend."""
+    return {
+        "service": "InnerGlow",
+        "status": "OK",
+        "version": "1.0.0",
+        "docs_url": "/docs"
+    }
 
-# Include assistant router
+# --- Include assistant router BEFORE mounting static files ---
 app.include_router(assistant_router)
+
+# --- Optionally expose model schemas for frontend/clients ---
+from backend.models import User, Session, Message, MoodEntry, JournalEntry
+
+@app.get("/schemas", tags=["meta"])
+def get_model_schemas():
+    """Returns Pydantic model schemas for API clients."""
+    return {
+        "User": User.schema(),
+        "Session": Session.schema(),
+        "Message": Message.schema(),
+        "MoodEntry": MoodEntry.schema(),
+        "JournalEntry": JournalEntry.schema()
+    }
 
 # --- Advanced health checks, startup, and shutdown events ---
 @app.on_event("startup")
@@ -67,19 +88,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"detail": exc.errors(), "body": exc.body, "type": "ValidationError"}
     )
 
-# Optionally expose model schemas for frontend/clients
-from backend.models import User, Session, Message, MoodEntry, JournalEntry
-
-@app.get("/schemas", tags=["meta"])
-def get_model_schemas():
-    """Returns Pydantic model schemas for API clients."""
-    return {
-        "User": User.schema(),
-        "Session": Session.schema(),
-        "Message": Message.schema(),
-        "MoodEntry": MoodEntry.schema(),
-        "JournalEntry": JournalEntry.schema()
-    }
+# --- Mount React build as static files at root ---
+static_folder = os.path.join(os.path.dirname(__file__), '../frontend/build')
+app.mount("/", StaticFiles(directory=static_folder, html=True), name="static")
 
 # --- Advanced: ready for adding more routers ---
 # For future: from backend.journal import router as journal_router
