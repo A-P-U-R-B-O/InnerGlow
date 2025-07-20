@@ -15,7 +15,7 @@ function App() {
 
   useEffect(() => {
     // Fetch backend root status on mount
-    fetch(`${API_URL}/`)
+    fetch(`${API_URL}/health`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch backend status");
         return res.json();
